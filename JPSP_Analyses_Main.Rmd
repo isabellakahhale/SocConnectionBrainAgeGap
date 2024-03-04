@@ -1,0 +1,785 @@
+---
+title: "Main & Supplemental Analyses for _Probing connections between social connectedness, mortality risk, and brain age: A preregistered study_. "      
+subtitle: "Study GitHub: https://github.com/isabellakahhale/SocConnectionBrainAgeGap"
+author: "Isabella Kahhale MS, Dr. Nikki A. Puccetti PhD, Dr. Aaron S. Heller PhD, Dr. Jamie Hanson PhD"
+date: "March 1st, 2024"
+output:
+  pdf_document: default
+  extra_dependencies: ["float"]
+  word_document: default
+toc: yes
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}
+---
+```{r libraries, eval = TRUE, message= FALSE, warning = FALSE, include = FALSE}
+library(tidyverse)
+library(tinytex)
+library(naniar) # used to replace values w NA
+library(psych)
+library(GPArotation)
+library(VIM)
+library(easystats)
+library(parameters)
+library(ggplot2)
+library(haven)
+library(gt)
+library(gtsummary)
+library(dplyr)
+library(mice) #imputation
+library(MASS)
+library(ggplot2)
+library(pscl)
+library(broom)
+library(performance)
+library(see)
+library(patchwork)
+library(rempsyc)
+library(pwr) # power analyses
+library(webshot2) # needed to make gt table
+library(sjPlot)
+#library(html2latex)
+library(knitr)
+#library(babel, "provide=*")
+library(modelsummary)
+library(kableExtra)
+library(tinytex)
+library(pander)
+library(jtools)
+library(float)
+```
+
+```{r read in  data, eval = TRUE, message= FALSE, warning = FALSE, include = FALSE}
+dataA <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/FinalFinal/MIDUS_dataA_02282024.csv")
+
+dataB <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/FinalFinal/MIDUS_dataB_02282024.csv")
+
+dataC <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/FinalFinal/MIDUS_dataC_02282024.csv")
+```
+
+# Methods
+
+## Social Connectedness: Positive Relations with Others
+
+This self-report measure was comprised of responses to the following 7 items:
+1) “Most people see me as loving and affectionate.” (R)
+2) “Maintaining close relationships has been difficult and frustrating for me.”
+3) “I often feel lonely because I have few close friends with whom to share my concerns.”
+4) “I enjoy personal and mutual conversations with family members and friends.” (R)
+5) “People would describe me as a giving person, willing to share my time with others.” (R)
+6) “I have not experienced many warm and trusting relationships with others.”  
+7) “I know that I can trust my friends, and they know they can trust me.” (R) 
+
+To each item, participants responded: 1= Strongly agree; 2=Somewhat agree; 3=A little Agree; 4=Neither agree or disagree; 5=A little disagree; 6=Somewhat disagree; 7=Strongly disagree. 
+
+Further details on MIDUS construct documentation can be found here: 
+
+for Core MIDUS (M1/M2): https://midus.wisc.edu/Projects/M2P1/M2P1_Survey/Documentation/M2_P1_DocumentationOfPsychosocialConstructsAndCompositeVariables_20201103.pdf
+
+for Refresher MIDUS (MR): 
+https://www.icpsr.umich.edu/web/NACDA/studies/36532/variables
+
+\newpage 
+# Descriptives 
+
+## Power Analyses
+
+```{r power calculations, eval=TRUE, include=TRUE}
+ pwr.r.test(n = NULL, r = .29, sig.level = 0.05, power = .80,
+        alternative = c("two.sided"))
+```
+
+## Imputation 
+
+The full MIDUS sample and the “mice” package was used to impute the following missing variables: Positive Relations with Others, Instrumental Activities of Daily Living, Basic Activities of Daily Living, Total Chronic Conditions, and Race. 
+
+## Correlation Table 
+```{r bivariate correlations, eval= FALSE, include = FALSE, echo=FALSE}
+corrdat <- dataC
+
+# emotional reactivity is PAI child report 
+labels <- c("Age", "Sex", "Latine/x", "Race",
+            "Income", "Sample", "Childhood Finances",
+            "Childhood Welfare", "BMI", "Panic Dx", "Depression Dx", "Anxiety Dx", "Social Connectedness", 
+            "Chronic Conditions", "ADLs")
+
+corrdat$DeathStatus <- as.numeric(corrdat$DeathStatus)
+
+#tab.corr <- 
+  
+corrdat %>% dplyr::select(FirstAge,
+  Sex,
+  Latine,
+  Race_Di,
+  Income,
+  Sample,
+  ChildhoodFinances,
+  Welfare,
+  BMI,
+  PanicDx,
+  DepressionDx,
+  GadDx,
+  PosRelations7,
+  ChronicConditions,
+  sumADL)  %>% 
+#  colMeans(na.rm = T)
+#apply(2,sd, na.rm = T) %>% 
+tab_corr(na.deletion = "pairwise", digits = 2, triangle = "lower",
+         title = "Table 1.  Descriptive Statistics and Correlations among Key Study Variables", var.labels = labels, p.numeric = FALSE)
+#
+ #        file = "CorrTable.html")
+
+# get descrptives 
+#datasummary(selectdata ~ Mean + SD, data = selectdata)
+```
+
+```{r table2 print, message = FALSE, echo=FALSE, fig.align = "left",out.width = '110%', out.extra = ""}
+knitr::include_graphics("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/CorrTable.png")
+```
+
+## Demographics Table
+
+```{r rename demographics for table 1, eval=FALSE, include = FALSE, echo=FALSE}
+demodata <- dataC
+
+demodata$Education <- factor(demodata$Education,
+                 levels=c("1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7",
+                          "8",
+                          "9",
+                          "10",
+                          "11",
+                          "12"),
+                 labels = c("No school/some grade school",
+                            "Eighth grade/ junior high school",
+                            "Some high school",
+                            "GED",
+                            "Graduated from high school",
+                            "1 to 2 years of college, no degree yet",
+                            "3 or more years of college, no degree yet",
+                            "Grad 2 year college or voc school, or associates degree",
+                            "Grad 4 or 5 year college or bachelors degree",
+                            "Some graduate school",
+                            "Masters degree",
+                            "Ph.D, Ed.D, MD, DDS, LLB, LLD, JD, or other prof degree"))
+
+demodata$Latine<- factor(demodata$Latine,
+                 levels=c("1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6",
+                          "7"),
+                 labels = c("Not Spanish/Hispanic",
+                            "Mexican",
+                            "Mexican American",
+                            "Chicano",
+                            "Puerto Rican",
+                            "Cuban",
+                            "Other Spanish"))
+
+demodata$Latine2<- factor(demodata$Latine,
+                 levels=c("Not Spanish/Hispanic"),
+                 labels = c("Not Spanish/Hispanic"))
+
+
+demodata$Race1 <- factor(demodata$Race1,
+                 levels=c("1",
+                          "2",
+                          "3",
+                          "4",
+                          "5",
+                          "6"),
+                 labels = c("White",
+                            "Black and/or African American",
+                            "Native American or Alaska Native Aleutian Islander/Eskimo",
+                            "Asian",
+                            "Native Hawaiian or Pacific Islander",
+                            "Other"))
+
+#split income into levels?
+
+demodata$cat_income <- cut(demodata$Income,
+                       breaks=c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 150000, 300000),
+                       labels=c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"))
+
+demodata %>% 
+  dplyr::select(cat_income, Income)
+
+demodata<- demodata %>% mutate(cat_income_recode = recode(cat_income,
+                                      "0" = "Less than $10,000",
+                                      "1" = "$10,000 to $19,999",
+                                      "2" = "$20,000 to $29,999",
+                                      "3" = "$30,000 to $39,999",
+                                      "4" = "$40,000 to $49,999",
+                                      "5" = "$50,000 to $59,999",
+                                      "6" = "$60,000 to $69,999",
+                                      "7" = "$70,000 to $79,999",
+                                      "8" = "$80,000 to $89,999",
+                                      "9" = "$90,000 to $99,999", 
+                                      "10" = "$100,000 to $149,999",
+                                      "11" = "$150,000 or more",
+                                      "12" = "Choose not to disclose"))
+
+demodata<- demodata %>% mutate(sex_recode = recode(Sex,
+                                      "1" = "Male",
+                                      "2" = "Female"))
+
+demodata<- demodata %>% mutate(sample_recode = recode(Sample,
+                                      "1" = "M2",
+                                      "2" = "MR"))
+
+```
+
+```{r demographics table, eval = FALSE, include = FALSE, echo=FALSE}
+demodata %>% 
+        mutate(Total = 1) %>% # doing this to display N for each site/type 
+  # select in order of how we want to appear in table
+  dplyr::select(c(FirstAge, sex_recode, Latine2, Race1, Education, cat_income_recode, sample_recode, Total)) %>% 
+  dplyr::rename(
+  "Income" = cat_income_recode,
+  "Age (years)" = FirstAge,
+  "Latine/x" = Latine2,
+  "Sex" = sex_recode
+  ) %>% 
+#  tbl_summary(by = "Sample", missing = "no") %>% 
+  tbl_summary(
+    by = sample_recode,
+    statistic = list(all_continuous() ~ "{mean} ({sd})",
+                     all_categorical() ~ "{n} ({p}%)",
+                     Total ~ "N = {N}"),
+    missing = "no") %>% 
+  add_overall(last = TRUE, col_label = "**Overall**") %>% 
+  modify_header(all_stat_cols(FALSE) ~ "**{level}**") %>% 
+  #  add_overall(last = TRUE, col_label = "**Overall**") # remove the n from header
+  as_gt() %>% 
+   tab_header(
+    title = "Table 1. Descriptive Statistics for Key Variables by Recruitment Sample") #%>% 
+  #  gt::tab_source_note(gt::md(".")) %>% 
+#gt::gtsave(             # save table as image
+ #  filename = "table_1.png")
+```
+
+```{r print descriptives, include=TRUE, message = FALSE, echo=FALSE, fig.align = "left",out.width = '130%', out.extra = ""}
+knitr::include_graphics("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/Table_1.jpg")
+```
+
+\newpage 
+
+# Results & Analyses
+
+## Research Question 1. 
+
+Are there associations between social connectedness and mortality risk? 
+
+### C path: Social Connectedness and Chronic Health Conditions (N = 8692)
+
+```{r c path chronic, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_mod1 <- lm(ChronicConditions ~ PosRelations7 + FirstAge + Sample + Sex + Race_Di, dataA)
+#summary(cpath_mod1)
+summ(cpath_mod1, getOption("jtools-digits", 4))
+```
+
+\clearpage 
+
+### C path: Social Connectedness and ADLs (N = N = 8692)
+
+```{r c path summed ADLs, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_mod2 <- lm(sumADL ~ PosRelations7 + FirstAge + Sample + Sex + Race_Di, dataA)
+#summary(cpath_mod2)
+summ(cpath_mod2, getOption("jtools-digits", 4))
+```
+
+### C path: Social Connectedness and Chronic Health Conditions (N = 201)
+
+```{r c path chronic subsample, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_mod3 <- lm(ChronicConditions ~ PosRelations7 + ScanAge + Sample + Sex + Race_Di, dataB)
+#summary(cpath_mod3)
+summ(cpath_mod3, getOption("jtools-digits", 4))
+```
+
+\clearpage 
+
+### C path: Social Connectedness and ADLs (N = 201)
+
+```{r c path summed ADLs subsample, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_mod4 <- lm(sumADL ~ PosRelations7 + ScanAge + Sample + Sex + Race_Di, dataB)
+#summary(cpath_mod4)
+summ(cpath_mod4, getOption("jtools-digits", 4))
+```
+
+### C path: Social Connectedness and Chronic Health Conditions (N = 197)
+
+```{r c path chronic subsample nonimputed, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_mod5 <- lm(ChronicConditions ~ PosRelations7 + ScanAge + Sample + Sex + Race_Di, dataC)
+#summary(cpath_mod5)
+summ(cpath_mod5, getOption("jtools-digits", 4))
+```
+
+\clearpage 
+
+### C path: ADLs and Chronic Health Conditions (N = 197)
+
+```{r c path adls subsample nonimputed, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_mod6 <- lm(sumADL ~ PosRelations7 + ScanAge + Sample + Sex + Race_Di, dataC)
+#summary(cpath_mod6)
+summ(cpath_mod6, getOption("jtools-digits", 4))
+```
+
+\newpage 
+
+## Research Question 2. 
+
+Are there associations between positive relations with others and the brain-age gap?
+
+### A Path: Social Connectedness and Brain Age Gap (N = 201)
+
+```{r a path pos to bag with imputed, eval = TRUE, include = TRUE, echo = FALSE}
+apath_mod1 <- lm(Kaufmann_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(apath_mod1)
+summ(apath_mod1, getOption("jtools-digits", 4))
+```
+
+\clearpage 
+
+### A Path: Social Connectedness and Brain Age Gap (N = 197)
+
+```{r a path pos to bag, eval = TRUE, include = TRUE, echo = FALSE}
+apath_mod1 <- lm(Kaufmann_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataC)
+#summary(apath_mod1)
+summ(apath_mod1, getOption("jtools-digits", 4))
+```
+
+\newpage 
+
+## Research Question 3. 
+
+Are associations between positive relations with others and all-cause mortality statistically accounted for by the brain-age gap?
+
+### B path: Brain Age Gap and Total Chronic Conditions (N = 201)
+
+```{r b path bag to chronic conditions imputed, eval=TRUE, include=TRUE, echo=FALSE}
+bpath_mod1 <- lm(ChronicConditions ~ Kaufmann_BAG  +Sample + Sex + AGE + Race_Di + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod1)
+summ(bpath_mod1, getOption("jtools-digits", 4))
+```
+
+\clearpage 
+
+### B path: Brain Age Gap and Total Chronic Conditions (N = 197)
+
+```{r b path bag to chronic conditions, eval=TRUE, include=TRUE, echo=FALSE}
+bpath_mod1 <- lm(ChronicConditions ~ Kaufmann_BAG  +Sample + Sex + Race_Di + AGE + CAT12_Grade + ScanLag, dataC)
+#summary(bpath_mod1)
+summ(bpath_mod1, getOption("jtools-digits", 4))
+```
+
+\newpage 
+
+### B path: Brain Age Gap and ADLs (N = 201)
+
+```{r b path bag to sum ADLs imputed, eval=TRUE, include=TRUE, echo=FALSE}
+bpath_mod2 <- lm(sumADL ~ Kaufmann_BAG  +  Sample + Sex + AGE +  Race_Di + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod2)
+summ(bpath_mod2, getOption("jtools-digits", 4))
+```
+\newpage 
+
+### B path: Brain Age Gap and ADLs (N = 197)
+
+```{r b path bag to sum ADLs, eval=TRUE, include=TRUE, echo=FALSE}
+bpath_mod2 <- lm(sumADL ~ Kaufmann_BAG  +  Sample + Sex + AGE + Race_Di+ CAT12_Grade + ScanLag, dataC)
+#summary(bpath_mod2)
+summ(bpath_mod2, getOption("jtools-digits", 4))
+```
+
+\newpage 
+
+## Exploratory & Supplemental Analyses
+
+### Mortality
+
+Analyses with mortality records were performed on the entire MIDUS sample using a generalized linear model with a binomial distribution and logit link function to model the effect of variables on a binary outcome (0 = not deceased; 1 = deceased). 
+
+#### C Path: Social Connectedness Predicting Mortality in Full MIDUS (N = 8692)
+
+```{r prep mortality dataA, eval=TRUE, include=FALSE, echo=FALSE}
+#replaces all NAs for death with 0 
+tempmortA <- dataA 
+tempmortA$DeathStatus[is.na(tempmortA$DeathStatus)] <- 0
+```
+
+```{r c path mortality entire mindus, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_moddeath <- glm(DeathStatus ~ PosRelations7 + FirstAge + Sample  + Sex + Race_Di, family = "binomial", tempmortA)
+#summary(cpath_moddeath)
+
+summ(cpath_moddeath, getOption("jtools-digits", 4))
+# for a 1 unit increase in social connectedness, the odds ratio of dying decrease by a factor of 0.976. 
+# odds ratio less than 1 incdicates decreased occurrence of an event (protective exposure) 
+#-2.4% decrease in the odds of death
+
+# obtain odds ratios
+#exp(coef(cpath_moddeath))
+```
+
+\clearpage 
+\newpage 
+
+### Other Algorithms Deriving the Brain-Age Gap
+
+Various algorithms for predicting brain age have emerged in the past few years. In addition to the algorithm developed by Kaufamann and colleagues (2019), we derived brain age using 4 alternative algorithms. The predicted brain ages from all 5 algorithms can be found on the study GitHub. For further information on all 5 algorithms, please see the following pre-print (Hanson et al., under review; https://www.researchsquare.com/article/rs-3331689/v1)
+
+The additional algorithms considered were developed by:
+
+- Cole and colleagues (2018), referred to as "brainageR"
+- Bashyam and colleagues (2020), referred to as "DeepBrainNet"
+- Han and colleagues (2021), referred to as "ENIGMA"
+- Leonardsen and colleagues (2022), referred to as "pyment"
+
+#### _a_ Paths: Social Connectedness Predicting BAG in 4 Alternative Algorithms (N = 201)
+\
+```{r a path pos to bag with DeepBrainNet_BAG, eval = TRUE, include = TRUE, echo = FALSE}
+apath_mod <- lm(ANTs_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(apath_mod)
+summ(apath_mod, getOption("jtools-digits", 4))
+```
+
+\newpage
+
+```{r a path pos to bag with brainageR_BAG, eval = TRUE, include = TRUE, echo = FALSE, fig.pos='H'}
+apath_mod <- lm(brainageR_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(apath_mod)
+summ(apath_mod, getOption("jtools-digits", 4))
+```
+
+
+```{r a path pos to bag with pyment_BAG, eval = TRUE, include = TRUE, echo = FALSE, fig.pos='H'}
+apath_mod <- lm(pyment_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(apath_mod)
+summ(apath_mod, getOption("jtools-digits", 4))
+```
+
+\clearpage
+
+```{r a path pos to bag with ENIGMA, eval = TRUE, include = TRUE, echo = FALSE, fig.pos='H'}
+apath_mod <- lm(ENIGMA_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(apath_mod)
+summ(apath_mod, getOption("jtools-digits", 4))
+```
+
+\clearpage 
+\newpage
+
+#### _b_ Paths: BAG predicting Total Chronic Conditions in  4 Alternative Algorithms (N = 201)
+\
+```{r b path bag to chronic other BAGS, eval = TRUE, include = TRUE, echo = FALSE}
+bpath_mod <- lm(ChronicConditions ~ ANTs_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+
+bpath_mod <- lm(ChronicConditions ~ brainageR_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+
+bpath_mod <- lm(ChronicConditions ~ pyment_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+
+bpath_mod <- lm(ChronicConditions ~ ENIGMA_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+```
+
+\newpage
+\clearpage
+
+#### _b_ Paths: BAG predicting ADLs in  4 Alternative Algorithms (N = 201)
+\
+```{r b path bag to ADLS other BAGS, eval = TRUE, include = TRUE, echo = FALSE}
+bpath_mod <- lm(sumADL ~ ANTs_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+
+bpath_mod <- lm(sumADL ~ brainageR_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+
+bpath_mod <- lm(sumADL ~ pyment_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+
+bpath_mod <- lm(sumADL ~ ENIGMA_BAG + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod)
+summ(bpath_mod, getOption("jtools-digits", 4))
+```
+
+\newpage 
+\clearpage 
+
+## Sensitivity Analyses: Covariates Included in Main Models
+
+### Scan Quality 
+
+To assess MRI quality, we generated a quantitative metric  (“CAT12 score”) using The Computational Anatomy Toolbox 12 (CAT12) toolbox from the Structural Brain Mapping group indicating the quality of each collected MR image  (Gaser & Kurth, 2017). This metric considers four summary measures of image quality: noise-to-contrast ratio, coefficient of joint variation, inhomogeneity-to-contrast ratio, and root-mean-squared voxel resolution. The method employed considers four summary measures of image quality: (1) noise to contrast ratio, (2) coefficient of joint variation, (3) inhomogeneity to contrast ratio, and (4) root mean squared voxel resolution. To produce a single aggregate metric that serves as an indicator of overall quality, this toolbox normalizes each measure and combines them using a kappa statistic-based framework, for optimizing a generalized linear model through solving least squares (Dahnke et al., 2015). The score is a value from 0 to 1, with higher values indicating better image quality. Additional information is available at: http://www.neuro.uni-jena.de/cat/index.html#QA. 
+
+The following sensitivity analyses modeled all paths (a, b, and c) using only high quality scans. This represents scans with a CAT12 grade of 0.80 or higher. 
+
+#### _c_ Path with High Quality Scans (N = 96)
+\
+```{r c paths 1 pos to health with bag with above 0.8 quality, eval = TRUE, include = TRUE, echo = FALSE}
+tempdata <- dataB %>%
+  filter(CAT12_Grade > 0.8)
+
+cpath_mod1 <- lm(ChronicConditions ~ PosRelations7  + Race_Di + Sex + ScanAge + ScanLag + CAT12_Grade, tempdata)
+#summary(cpath_mod1)
+summ(cpath_mod1, getOption("jtools-digits", 4))
+        
+```
+
+\clearpage 
+
+```{r c paths 2 pos to health with bag with above 0.8 quality, eval = TRUE, include = TRUE, echo = FALSE}
+cpath_mod2 <- lm(sumADL ~ PosRelations7  + Race_Di + Sex + ScanAge + ScanLag + CAT12_Grade, tempdata)
+#summary(cpath_mod2)
+summ(cpath_mod2, getOption("jtools-digits", 4))
+```
+
+#### _a_ Path with High Quality Scans (N = 96)
+\
+```{r a path pos to health with bag with above 0.8 quality, eval = TRUE, include = TRUE, echo = FALSE}
+apath_mod1 <- lm(Kaufmann_BAG ~ PosRelations7  + Race_Di + Sex + ScanAge + ScanLag + CAT12_Grade, tempdata)
+#summary(apath_mod1)
+summ(apath_mod1, getOption("jtools-digits", 4))
+```
+
+\clearpage 
+
+\newpage
+
+#### _b_ Path with High Quality Scans (N = 96)
+\
+```{r b paths pos to health with bag with above 0.8 quality, eval = TRUE, include = TRUE, echo = FALSE}
+bpath_mod1 <- lm(sumADL ~ Kaufmann_BAG + Race_Di + Sex + ScanAge + ScanLag + CAT12_Grade, tempdata)
+#summary(bpath_mod1)
+summ(bpath_mod1, getOption("jtools-digits", 4))
+
+bpath_mod2 <- lm(ChronicConditions ~ Kaufmann_BAG + Race_Di + Sex + ScanAge + ScanLag + CAT12_Grade, tempdata)
+#summary(bpath_mod2)
+summ(bpath_mod2, getOption("jtools-digits", 4))
+```
+
+\newpage 
+
+### Age
+
+We  ran analyses using the brain-age gap (i.e., _a_ and _b_ path models) excluding chronological age. The inclusion of this variable in models is currently a point of debate in the field.
+
+#### _a_ Path Model without Age as a Covariate 
+\
+```{r a path BAG no age, eval=TRUE, include=TRUE, echo=FALSE}
+apath_mod1 <- lm(Kaufmann_BAG ~ PosRelations7 + Sample + Race_Di + Sex + CAT12_Grade + ScanLag, dataB)
+#summary(apath_mod1)
+summ(apath_mod1, getOption("jtools-digits", 4))
+```
+
+\newpage 
+
+#### _b_ Path Models without Age as a Covariate 
+\
+```{r b path BAG no age, eval=TRUE, include=TRUE, echo=FALSE}
+bpath_mod1 <- lm(ChronicConditions ~ Kaufmann_BAG + Sample + Race_Di + Sex + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod1)
+#ggplot(dataB, aes(x=Kaufmann_BAG, y=ScanAge)) +geom_point(shape=16, size=3,color = 'black',alpha = 0.5) + geom_smooth(method=lm, color = 'red') 
+
+summ(bpath_mod1, getOption("jtools-digits", 4))
+
+bpath_mod2 <- lm(sumADL ~ Kaufmann_BAG + Sample + Race_Di + Sex + CAT12_Grade + ScanLag, dataB)
+#summary(bpath_mod2)
+summ(bpath_mod2, getOption("jtools-digits", 4))
+```
+
+\newpage
+\clearpage
+
+#### _a_ Path Model with Older Sample (> 50 years; N = 101).
+\
+```{r a path pos to bag with older than 50 years old, eval = TRUE, include = TRUE, echo = FALSE}
+tempdata <- dataC %>%
+  filter(ScanAge > 50)
+
+apath_mod1 <- lm(Kaufmann_BAG ~ PosRelations7 + Race_Di + Sample + AGE + Sex + CAT12_Grade + ScanLag, tempdata)
+#summary(apath_mod1)
+summ(apath_mod1, getOption("jtools-digits", 4))
+```
+
+\newpage
+#### _b_ Path Model with Older Sample (> 50 years; N = 102).
+\
+```{r b path pos to bag with older than 50 years old, eval = TRUE, include = TRUE, echo = FALSE}
+
+bpath_mod1 <- lm(ChronicConditions ~ Kaufmann_BAG + Race_Di + AGE + Sample + Sex + CAT12_Grade + ScanLag, tempdata)
+#summary(bpath_mod1)
+summ(bpath_mod1, getOption("jtools-digits", 4))
+
+bpath_mod2 <- lm(sumADL ~ Kaufmann_BAG + Race_Di + AGE + Sample + Sex + CAT12_Grade + ScanLag, tempdata)
+#summary(bpath_mod2)
+summ(bpath_mod2, getOption("jtools-digits", 4))
+```
+
+\newpage
+
+
+\clearpage
+\newpage 
+
+## Sensitivity Analyses: Additional Covariates
+
+As specified in our registered report, we ran regression analyses with the additional independent variables a) income, b) mental health diagnosis, c) childhood social class, and d) BMI predicting both brain age (i.e., a path) and mortality risk (c path) in separate models (i.e., a different model for each additional covariate). 
+
+### Body Mass Index (BMI)
+
+BMI was derived via participant self-report and calculated by dividing respondent’s weight (mass) in kilograms by heights in meters squared. Per the MIDUS code book, the height measure (in inches) was multiplied by 0.0254 to get the height in meters, and the weight (in pounds) was multiplied by 0.4536 to get the mass in kilometers.
+
+#### _a_ Path with BMI
+\
+```{r bmi sensitivity a path, eval=TRUE, include=TRUE, echo=FALSE}
+apath_bmi <- lm(Kaufmann_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + BMI, dataB)
+#summary(apath_bmi)
+summ(apath_bmi, getOption("jtools-digits", 4))
+```
+
+#### _c_ Path with BMI
+\
+```{r bmi sensitivity c path, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_bmi <- lm(sumADL ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + BMI, dataB)
+#summary(bpath_bmi)
+summ(cpath_bmi, getOption("jtools-digits", 4))
+
+cpath_bmi <- lm(ChronicConditions ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + BMI, dataB)
+#summary(bpath_bmi)
+summ(cpath_bmi, getOption("jtools-digits", 4))
+```
+
+\clearpage
+\newpage
+
+### Childhood Social Class 
+
+Participants answered via self-report how they compared to other families in terms of finances growing up. Participants responded _a lot better off, somewhat better off, a little better off, same as average family, a little worse off, somewhat worse off, a lot worse off, or I don’t know_. Participants also responded via self-report whether their family was on Welfare/ADC growing up (0 = no, 1 = Yes). Below, we z-score each of these variables and sum them for a composite measure of childhood social class.
+
+```{r make social class z score, eval=TRUE, include=TRUE, echo=FALSE}
+dataB$ChildhoodFinances_z <- 0
+dataB$ChildhoodFinances_z <- scale(dataB$ChildhoodFinances)
+
+dataB$Welfare_z <- 0
+dataB$Welfare_z <- scale(dataB$Welfare)
+
+dataB$ChildhoodSocClass <- 0
+dataB$ChildhoodSocClass <- (dataB$Welfare_z + dataB$ChildhoodFinances_z)
+```
+
+#### _a_ Path with Social Class
+\
+```{r social class sensitivity a path, eval=TRUE, include=TRUE, echo=FALSE}
+apath_socialclass <- lm(Kaufmann_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + ChildhoodSocClass, dataB)
+#summary(apath_socialclass)
+summ(apath_socialclass, getOption("jtools-digits", 4))
+```
+
+\newpage
+#### _c_ Path with Social Class
+\
+```{r social class sensitivity c path, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_socialclass <- lm(sumADL ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + ChildhoodSocClass, dataB)
+#summary(bpath_socialclass)
+summ(cpath_socialclass, getOption("jtools-digits", 4))
+
+
+cpath_socialclass <- lm(ChronicConditions ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + ChildhoodSocClass, dataB)
+#summary(bpath_socialclass)
+summ(cpath_socialclass, getOption("jtools-digits", 4))
+```
+
+\clearpage
+\newpage
+
+### Income
+
+Participants self-reported their various income sources. We used the variable representing _household total income from wage, pension, social security, and other sources_.
+
+#### _a_ Path with Income
+\
+```{r income sensitivity a path, eval=TRUE, include=TRUE, echo=FALSE}
+apath_income <- lm(Kaufmann_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + Income, dataB)
+#summary(apath_income)
+summ(apath_income, getOption("jtools-digits", 4))
+```
+
+#### _c_ Path with Income
+\
+```{r income sensitivity c path, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_income <- lm(sumADL ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + Income, dataB)
+#summary(bpath_income)
+summ(cpath_income, getOption("jtools-digits", 4))
+
+cpath_income <- lm(ChronicConditions ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + Income, dataB)
+#summary(bpath_income)
+summ(cpath_income, getOption("jtools-digits", 4))
+```
+
+\clearpage
+\newpage
+
+### Mental Health Diagnoses
+
+Participants answered several questions on symptoms for Panic Disorder, Depression, or Anxiety on a commonly-used questionnaire (Wang et al., 2000). Based on their responses, they received a score of 0 if they did not meet criteria for a diagnosis and a score of 1 if they did meet criteria. In this analysis, a Mental health Diagnosis composite variable was derived by summing all three variables. 
+
+
+```{r make diagnosis sum, eval=TRUE, include=TRUE, echo=FALSE}
+dataB$MentalHealthDx <- 0
+dataB$MentalHealthDx <- (dataB$PanicDx + dataB$DepressionDx + dataB$GadDx)
+```
+
+#### _a_ Path with Mental Health Diagnoses
+\
+```{r mental health sensitivity a path, eval=TRUE, include=TRUE, echo=FALSE}
+apath_dx <- lm(Kaufmann_BAG ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + MentalHealthDx, dataB)
+#summary(apath_dx)
+summ(apath_dx, getOption("jtools-digits", 4))
+```
+#### _c_ Path with Mental Health Diagnoses
+\
+```{r mentalhealth sensitivity c path, eval=TRUE, include=TRUE, echo=FALSE}
+cpath_dx <- lm(sumADL ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + MentalHealthDx, dataB)
+#summary(bpath_dx)
+summ(cpath_dx, getOption("jtools-digits", 4))
+
+cpath_dx <- lm(ChronicConditions ~ PosRelations7 + Sample + Race_Di + Sex + AGE + CAT12_Grade + ScanLag + MentalHealthDx, dataB)
+#summary(bpath_dx)
+summ(cpath_dx, getOption("jtools-digits", 4))
+```
+
+\clearpage
+\newpage
+
+_References_ 
+
+Bashyam VM, Erus G, Doshi J, et al (2020) MRI signatures of brain age and disease over the lifespan based on a deep brain network and 14 468 individuals worldwide. Brain 143:2312–2324
+
+Cole JH, Ritchie SJ, Bastin ME, et al (2018) Brain age predicts mortality. Mol Psychiatry 23:1385– 1392
+
+Dahnke, R., Ziegler, G., Grosskreutz, J., & Gaser, C. (2015). Quality Assurance in Structural MRI. 21st Annual Meeting of the Organization For Human Brain Mapping, 1556.
+
+Gaser, C., & Kurth, F. (2017). Manual computational anatomy toolbox-cat12. Structural Brain Mapping Group at the Departments of Psychiatry and Neurology, University of Jena.
+
+Han LK, Dinga R, Hahn T, et al (2021) Brain aging in major depressive disorder: results from the ENIGMA major depressive disorder working group. Mol Psychiatry 26:5124–5139
+
+Leonardsen EH, Peng H, Kaufmann T, et al (2022) Deep neural networks learn general and clinically relevant representations of the ageing brain. NeuroImage 256:119210 
+
+Wang, P. S., Berglund, P., & Kessler, R. C. (2000). Recent care of common mental disorder in the United States: Prevalence and conformance with evidence-based recommendations. Journal of General Internal Medicine, 15: 284-292.
