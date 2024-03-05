@@ -1,7 +1,7 @@
 ---
 title: "Main & Supplemental Analyses for _Probing connections between social connectedness, mortality risk, and brain age: A preregistered study_. "      
-subtitle: "Study GitHub: https://github.com/isabellakahhale/SocConnectionBrainAgeGap"
-author: "Isabella Kahhale MS, Dr. Nikki A. Puccetti PhD, Dr. Aaron S. Heller PhD, Dr. Jamie Hanson PhD"
+subtitle: "Study GitHub: /r/SocConnectionBrainAgeGap-15CF/"
+author: removed for maskng
 date: "March 1st, 2024"
 output:
   pdf_document: default
@@ -50,11 +50,11 @@ library(float)
 ```
 
 ```{r read in  data, eval = TRUE, message= FALSE, warning = FALSE, include = FALSE}
-dataA <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/FinalFinal/MIDUS_dataA_02282024.csv")
+dataA <- read.csv(""PATHNAME_REDACTED"")
 
-dataB <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/FinalFinal/MIDUS_dataB_02282024.csv")
+dataB <- read.csv("PATHNAME_REDACTED")
 
-dataC <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/FinalFinal/MIDUS_dataC_02282024.csv")
+dataC <- read.csv("PATHNAME_REDACTED"")
 ```
 
 # Methods
@@ -134,7 +134,7 @@ tab_corr(na.deletion = "pairwise", digits = 2, triangle = "lower",
 ```
 
 ```{r table2 print, message = FALSE, echo=FALSE, fig.align = "left",out.width = '110%', out.extra = ""}
-knitr::include_graphics("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/CorrTable.png")
+knitr::include_graphics("PATHNAME_REDACTED")
 ```
 
 ## Demographics Table
@@ -267,7 +267,7 @@ demodata %>%
 ```
 
 ```{r print descriptives, include=TRUE, message = FALSE, echo=FALSE, fig.align = "left",out.width = '130%', out.extra = ""}
-knitr::include_graphics("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/Table_1.jpg")
+knitr::include_graphics(""PATHNAME_REDACTED"")
 ```
 
 \newpage 
