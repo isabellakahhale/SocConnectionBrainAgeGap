@@ -1,7 +1,7 @@
 ---
 title: "Data Organization & Cleaning File for _Probing connections between social connectedness, mortality risk, and brain age: A preregistered study_"
 date: "March 1st, 2024"
-authors: Isabella Kahhale MS
+authors: REDACTED
 output: pdf_document
 ---
 
@@ -30,17 +30,17 @@ library(rempsyc)
 ```
 
 ```{r read in raw data, eval = TRUE, message= FALSE, warning = FALSE, include = FALSE}
-fulldataset <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/MIDUS_JPSP_Final.csv")
+fulldataset <- read.csv("PATHNAME_REDACTED")
 
-quality <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/Data/MIDUS_CAT12_Grades.csv")
+quality <- read.csv("PATHNAME_REDACTED")
 
-brainage <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/Data/MIDUS_brain_ages_w_ages_noDup.csv")
+brainage <- read.csv("PATHNAME_REDACTED")
 
-mriIDs <- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/MIDUS_mri_IDs.csv")
+mriIDs <- read.csv("PATHNAME_REDACTED")
 
-#coremort <- read_spss("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/ProsocialFactor/mortality_data/MIDUS_Core_MortalityCauseData_N2124_20220310.sav")
+#coremort <- read_spss("PATHNAME_REDACTED")
 
-refreshermort <- read_spss("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/ProsocialFactor/mortality_data/MIDUS_Refresher_MortalityCauseData_N281_20220603.sav")
+refreshermort <- read_spss("PATHNAME_REDACTED")
 ```
 
 ```{r add mortality, eval = FALSE, include = FALSE}
@@ -236,7 +236,7 @@ imputeData <- complete(imputeData,1)
 ```
 
 ```{r combine impute data w cleanfulldataset, eval = TRUE, include = FALSE}
-imputeData<- read.csv("/Users/isabellakahhale/Library/CloudStorage/OneDrive-UniversityofPittsburgh/Isabella/Research/BAP/JPSP_Analyses/FinalData/FinalFinal/cleanfulldata_impute_02282024.csv")
+imputeData<- read.csv("PATHNAME_REDACTED")
 
 # make Race Di summary score on imputed data
 imputeData$Race1 <- as.numeric(imputeData$Race1)
