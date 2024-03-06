@@ -1,6 +1,5 @@
 ---
-title: "Main & Supplemental Analyses for _Probing connections between social connectedness, mortality risk, and brain age: A preregistered study_. "      
-subtitle: "Study GitHub: /r/SocConnectionBrainAgeGap-15CF/"
+title: "Main & Supplemental Analyses for _Probing connections between social connectedness, mortality risk, and brain age: A preregistered study_. "  
 author: removed for maskng
 date: "March 1st, 2024"
 output:
